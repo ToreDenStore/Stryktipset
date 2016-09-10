@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Main
@@ -21,47 +22,87 @@ public class Main
 			String line = buffReader.readLine();
 			while(line != null) {
 				System.out.println("LINE:\n" + line);
-				line = buffReader.readLine();
 				String[] matchArgs = line.split(";");
 				Match match = new Match(matchArgs[0], Float.parseFloat(matchArgs[1]), Float.parseFloat(matchArgs[2]), Float.parseFloat(matchArgs[3]));
 				matches.add(match);
+				line = buffReader.readLine();
 			}
 		} catch(FileNotFoundException e) {
 			e.printStackTrace();
 			System.out.println("Input file not found");
 		}
-		
-		
-		List<RowAlternative> rowAlternatives = createRowAlternatives(matches);
-//		for(Match match1 : matches) {
-//			ResultAlternative resultAlternative1 = new ResultAlternative(match1, Result._1);
-//			ResultAlternative resultAlternativeX = new ResultAlternative(match1, Result._X);
-//			ResultAlternative resultAlternative2 = new ResultAlternative(match1, Result._2);
-//			for(Match match2 : matches) {
-//				if(match2.equals(match1)){
-//					continue;
-//				}
-//				
-//				
-//				
-//				
-//				for(Match match3 : matches) {
-//					
-//				}
-//			}
-//		}
+
+		ColumnsCreator columnsCreator = new ColumnsCreator(matches);
+		columnsCreator.createColumns();
+		List<ColumnAlternative> columnAlternatives = columnsCreator.getColumnAlternatives();
+
+		System.out.println("Sorting columns...");
+		columnAlternatives.sort(new ColumnAlternative.ColumnSorter());
+		Collections.reverse(columnAlternatives);
+
+		print13(columnAlternatives);
+		print12(columnAlternatives);
+		print11(columnAlternatives);
 	}
 
-	private static List<RowAlternative> createRowAlternatives(List<Match> matches)
+	private static void print11(List<ColumnAlternative> columnAlternatives)
 	{
-//		List<RowAlternative> rowAlternatives = new ArrayList<RowAlternative>();
-		
-		for(Match match : matches) {
-			
+		// TODO Auto-generated method stub
+
+	}
+
+	private static void print12(List<ColumnAlternative> columnAlternatives)
+	{
+		System.out.println("\nPrinting 12:");
+
+		List<ColumnAlternative> columnAlternativesAlreadyPrinted = new ArrayList<ColumnAlternative>();
+
+		for(int i = 0; i < columnAlternatives.size(); i++) {
+			if(columnAlternativesAlreadyPrinted.size() >= 13) {
+				break;
+			}
+			ColumnAlternative columnAlternative = columnAlternatives.get(i);
+			boolean isOkayToAdd = true;
+			for(ColumnAlternative columnAlternativePrinted : columnAlternativesAlreadyPrinted) {
+				boolean isAlreadyCoveredFor = compareColumns(columnAlternative, columnAlternativePrinted);
+				if(isAlreadyCoveredFor) {
+					isOkayToAdd = false;
+				}
+			}
+			if(isOkayToAdd) {
+				System.out.println("Index: " + i);
+				System.out.println(columnAlternative.getProbability() * 100 + "%  " + columnAlternative.toString());
+				columnAlternativesAlreadyPrinted.add(columnAlternative);
+			}
 		}
-		
-		
-		return null;
+	}
+
+	private static boolean compareColumns(ColumnAlternative columnAlternative, ColumnAlternative columnAlternativePrinted)
+	{
+		char[] first = columnAlternative.toString().toLowerCase().toCharArray();
+		char[] second = columnAlternativePrinted.toString().toLowerCase().toCharArray();
+
+		int counter = 0;
+		for(int i1 = 0; i1 < first.length; i1++) {
+			if(first[i1] != second[i1]) {
+				counter++;
+			}
+			if(counter >= 2) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static void print13(List<ColumnAlternative> columnAlternatives)
+	{
+		for(int i = 0; i < columnAlternatives.size(); i++) {
+			if(i > 13) {
+				break;
+			}
+			ColumnAlternative columnAlternative = columnAlternatives.get(i);
+			System.out.println(columnAlternative.getProbability() * 100 + "%  " + columnAlternative.toString());
+		}
 	}
 
 }

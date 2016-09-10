@@ -22,11 +22,11 @@ public class Match
 
 	private void calculateProbabilites(float odds1, float oddsX, float odds2)
 	{
-		float total = odds1 + oddsX + odds2;
+		float total = 1 / odds1 + 1 / oddsX + 1 / odds2;
 		float factor = 1 / total;
-		_probability1 = 1 - (odds1 * factor);
-		_probabilityX = 1 - (oddsX * factor);
-		_probability2 = 1 - (odds2 * factor);
+		_probability1 = factor * 1 / odds1;
+		_probabilityX = factor * 1 / oddsX;
+		_probability2 = factor * 1 / odds2;
 	}
 
 	public String getName()
@@ -51,13 +51,14 @@ public class Match
 
 	public float getProbability(Result result)
 	{
-//		case result:
-//			Result._1:
-//				return getProbability1();
-//			Result._X:
-//				return getProbabilityX();
-//			default:
-//		
+		switch(result) {
+		case _1:
+			return getProbability1();
+		case _X:
+			return getProbabilityX();
+		case _2:
+			return getProbability2();
+		}
 		return 0;
 	}
 
