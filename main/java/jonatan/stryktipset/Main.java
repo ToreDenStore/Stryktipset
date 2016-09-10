@@ -30,6 +30,38 @@ public class Main
 			e.printStackTrace();
 			System.out.println("Input file not found");
 		}
+		
+		
+		List<RowAlternative> rowAlternatives = createRowAlternatives(matches);
+//		for(Match match1 : matches) {
+//			ResultAlternative resultAlternative1 = new ResultAlternative(match1, Result._1);
+//			ResultAlternative resultAlternativeX = new ResultAlternative(match1, Result._X);
+//			ResultAlternative resultAlternative2 = new ResultAlternative(match1, Result._2);
+//			for(Match match2 : matches) {
+//				if(match2.equals(match1)){
+//					continue;
+//				}
+//				
+//				
+//				
+//				
+//				for(Match match3 : matches) {
+//					
+//				}
+//			}
+//		}
+	}
+
+	private static List<RowAlternative> createRowAlternatives(List<Match> matches)
+	{
+//		List<RowAlternative> rowAlternatives = new ArrayList<RowAlternative>();
+		
+		for(Match match : matches) {
+			
+		}
+		
+		
+		return null;
 	}
 
 }
