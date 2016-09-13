@@ -36,37 +36,72 @@ public class Main
 		columnsCreator.createColumns();
 		List<ColumnAlternative> columnAlternatives = columnsCreator.getColumnAlternatives();
 
+		try {
+			assertTotalChance(columnAlternatives);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return;
+		}
+
 		System.out.println("Sorting columns...");
 		columnAlternatives.sort(new ColumnAlternative.ColumnSorter());
 		Collections.reverse(columnAlternatives);
 
-		print13(columnAlternatives);
-		print12(columnAlternatives);
-		print11(columnAlternatives);
-	}
-
-	private static void print11(List<ColumnAlternative> columnAlternatives)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	private static void print12(List<ColumnAlternative> columnAlternatives)
-	{
-		System.out.println("\nPrinting 12:");
-
 		List<ColumnAlternative> columnAlternativesAlreadyPrinted = new ArrayList<ColumnAlternative>();
+		print13(columnAlternatives, columnAlternativesAlreadyPrinted);
+		print12(columnAlternatives, columnAlternativesAlreadyPrinted);
+		print11(columnAlternatives, columnAlternativesAlreadyPrinted);
+	}
 
+	private static void assertTotalChance(List<ColumnAlternative> columnAlternatives) throws Exception
+	{
+		float totalChance = 0;
+		for(ColumnAlternative columnAlternative : columnAlternatives) {
+			totalChance += columnAlternative.getProbability();
+		}
+		if(totalChance > 1.001 || totalChance < 0.999) {
+			throw new Exception("Total chance is not 1, it is " + totalChance);
+		}
+	}
+
+	private static void print13(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
+	{
 		for(int i = 0; i < columnAlternatives.size(); i++) {
-			if(columnAlternativesAlreadyPrinted.size() >= 13) {
+			if(i > 13) {
+				break;
+			}
+			ColumnAlternative columnAlternative = columnAlternatives.get(i);
+			System.out.println(columnAlternative.getProbability() * 100 + "%  " + columnAlternative.toString());
+			columnAlternativesAlreadyPrinted.add(columnAlternative);
+		}
+	}
+
+	private static void print12(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
+	{
+		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 2);
+	}
+
+	private static void print11(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
+	{
+		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 3);
+	}
+
+	private static void printX(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted, int difference)
+	{
+		System.out.println("\nPrinting " + (14 - difference) + ":");
+
+		int origSize = columnAlternativesAlreadyPrinted.size();
+		for(int i = 0; i < columnAlternatives.size(); i++) {
+			if(columnAlternativesAlreadyPrinted.size() >= origSize + 13) {
 				break;
 			}
 			ColumnAlternative columnAlternative = columnAlternatives.get(i);
 			boolean isOkayToAdd = true;
 			for(ColumnAlternative columnAlternativePrinted : columnAlternativesAlreadyPrinted) {
-				boolean isAlreadyCoveredFor = compareColumns(columnAlternative, columnAlternativePrinted);
+				boolean isAlreadyCoveredFor = compareColumns(columnAlternative, columnAlternativePrinted, difference);
 				if(isAlreadyCoveredFor) {
 					isOkayToAdd = false;
+					break;
 				}
 			}
 			if(isOkayToAdd) {
@@ -77,7 +112,12 @@ public class Main
 		}
 	}
 
-	private static boolean compareColumns(ColumnAlternative columnAlternative, ColumnAlternative columnAlternativePrinted)
+	/**
+	 * @param columnAlternative
+	 * @param columnAlternativePrinted
+	 * @return <code>true</code> if already covered for = proceed to next column
+	 */
+	private static boolean compareColumns(ColumnAlternative columnAlternative, ColumnAlternative columnAlternativePrinted, int difference)
 	{
 		char[] first = columnAlternative.toString().toLowerCase().toCharArray();
 		char[] second = columnAlternativePrinted.toString().toLowerCase().toCharArray();
@@ -87,22 +127,11 @@ public class Main
 			if(first[i1] != second[i1]) {
 				counter++;
 			}
-			if(counter >= 2) {
+			if(counter >= difference) {
 				return false;
 			}
 		}
 		return true;
-	}
-
-	private static void print13(List<ColumnAlternative> columnAlternatives)
-	{
-		for(int i = 0; i < columnAlternatives.size(); i++) {
-			if(i > 13) {
-				break;
-			}
-			ColumnAlternative columnAlternative = columnAlternatives.get(i);
-			System.out.println(columnAlternative.getProbability() * 100 + "%  " + columnAlternative.toString());
-		}
 	}
 
 }
