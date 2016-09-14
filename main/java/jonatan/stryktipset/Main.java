@@ -51,6 +51,50 @@ public class Main
 		print13(columnAlternatives, columnAlternativesAlreadyPrinted);
 		print12(columnAlternatives, columnAlternativesAlreadyPrinted);
 		print11(columnAlternatives, columnAlternativesAlreadyPrinted);
+		
+		checkIndexesCoveredFor(columnAlternatives, columnAlternativesAlreadyPrinted);
+	}
+
+	private static void checkIndexesCoveredFor(List<ColumnAlternative> columnAlternatives,
+			List<ColumnAlternative> columnAlternativesAlreadyPrinted)
+	{
+		//TODO: Make use of multithreading
+		System.out.println("Checking covered for by 12...");
+		int coveredFor11 = 0;
+		float probability11 = 0;
+		int coveredFor12 = 0;
+		float probability12 = 0;
+		int coveredFor13 = 0;
+		float probability13 = 0;
+		for(ColumnAlternative columnAlternative : columnAlternatives) {
+			if(columnAlternatives.indexOf(columnAlternative) % 100000 == 0){
+				System.out.println(columnAlternatives.indexOf(columnAlternative));
+			}
+			for(ColumnAlternative columnAlternativePrinted : columnAlternativesAlreadyPrinted) {
+				int difference = compareColumns(columnAlternativePrinted, columnAlternative);
+				if(difference <= 2) {
+					coveredFor11++;
+					probability11 += columnAlternative.getProbability();
+					if(difference <= 1) {
+						coveredFor12++;
+						probability12 += columnAlternative.getProbability();
+						System.out.println("12: " + probability12);
+						if(difference <= 0 && coveredFor13 < 39) {
+							coveredFor13++;
+							probability13 += columnAlternative.getProbability();
+							System.out.println("13: " + probability13);
+							break;
+						}
+					}
+				}
+			}
+		}
+		System.out.println(coveredFor11 + " rows are covered for 11 correct");
+		System.out.println("Total probability of 11 correct: " + probability11 * 100 + "%");
+		System.out.println(coveredFor12 + " rows are covered for 12 correct");
+		System.out.println("Total probability of 12 correct: " + probability12 * 100 + "%");
+		System.out.println(coveredFor13 + " rows are covered for 13 correct");
+		System.out.println("Total probability of 13 correct: " + probability13 * 100 + "%");
 	}
 
 	private static void assertTotalChance(List<ColumnAlternative> columnAlternatives) throws Exception
