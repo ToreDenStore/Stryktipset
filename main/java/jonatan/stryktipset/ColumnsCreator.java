@@ -41,18 +41,18 @@ public class ColumnsCreator
 		columnAlternative.addRowAlternative(resultAlternative, i);
 
 		i++;
-		if(i < _matches.size()){
+		if(i < _matches.size()) {
 			createRow(columnAlternative, i, 0);
 			createRow(columnAlternative, i, 1);
 			createRow(columnAlternative, i, 2);
 		} else {
 			_columnAlternatives.add(cloneColumn(columnAlternative));
-			if(_columnAlternatives.size() % 100000 == 0){
+			if(_columnAlternatives.size() % 100000 == 0) {
 				System.out.println("Created " + _columnAlternatives.size() + " columns");
 			}
 		}
 	}
-	
+
 	private ColumnAlternative cloneColumn(ColumnAlternative column)
 	{
 		ColumnAlternative newColumn = new ColumnAlternative();

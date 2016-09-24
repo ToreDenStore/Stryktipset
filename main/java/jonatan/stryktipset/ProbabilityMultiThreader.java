@@ -57,28 +57,18 @@ public class ProbabilityMultiThreader
 						for(ColumnAlternative columnAlternativePrinted : columnAlternativesAlreadyPrinted) {
 							int difference = Main.compareColumns(columnAlternativePrinted, columnAlternative, 3);
 							if(difference <= 2) {
-//								_coveredFor11.incrementAndGet();
-//								_probability11 += columnAlternative.getProbability();
-//								_probability11.set(_probability11.get() + columnAlternative.getProbability());
 								if(!columnsCoveredFor11.contains(columnAlternative)) {
 									synchronized (columnsCoveredFor11) {
 										columnsCoveredFor11.add(columnAlternative);
 									}
 								}
 								if(difference <= 1) {
-//									_coveredFor12.incrementAndGet();
-//									_probability12 += columnAlternative.getProbability();
-//									_probability12.set(_probability12.get() + columnAlternative.getProbability());
-//									System.out.println("12: " + _coveredFor12);
 									if(!columnsCoveredFor12.contains(columnAlternative)) {
 										synchronized (columnsCoveredFor12) {
 											columnsCoveredFor12.add(columnAlternative);
 										}
 									}
 									if(difference <= 0 && _coveredFor13.get() < 39) {
-//										_coveredFor13.incrementAndGet();
-//										_probability13 += columnAlternative.getProbability();
-//										_probability13.set(_probability13.get() + columnAlternative.getProbability());
 										if(!columnsCoveredFor13.contains(columnAlternative)) {
 											synchronized (columnsCoveredFor13) {
 												columnsCoveredFor13.add(columnAlternative);
@@ -121,12 +111,5 @@ public class ProbabilityMultiThreader
 		System.out.println("Total probability of 12 correct: " + probability12 * 100 + "%");
 		System.out.println(columnsCoveredFor13.size() + " rows are covered for 13 correct");
 		System.out.println("Total probability of 13 correct: " + probability13 * 100 + "%");
-
-//		System.out.println(_coveredFor11 + " rows are covered for 11 correct");
-//		System.out.println("Total probability of 11 correct: " + _probability11.get() * 100 + "%");
-//		System.out.println(_coveredFor12 + " rows are covered for 12 correct");
-//		System.out.println("Total probability of 12 correct: " + _probability12.get() * 100 + "%");
-//		System.out.println(_coveredFor13 + " rows are covered for 13 correct");
-//		System.out.println("Total probability of 13 correct: " + _probability13.get() * 100 + "%");
 	}
 }

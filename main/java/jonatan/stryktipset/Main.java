@@ -53,84 +53,14 @@ public class Main
 		print13(columnAlternatives, columnAlternativesAlreadyPrinted);
 		print12(columnAlternatives, columnAlternativesAlreadyPrinted);
 		print11(columnAlternatives, columnAlternativesAlreadyPrinted);
-		
+
 		long startTime = System.nanoTime();
-//		List<ColumnAlternative> a = checkIndexesCoveredFor(columnAlternatives, columnAlternativesAlreadyPrinted);
-		
-//		columnAlternativesAlreadyPrinted = new ArrayList<ColumnAlternative>();
-//		print12(columnAlternatives, columnAlternativesAlreadyPrinted);
-//		List<ColumnAlternative> b = checkIndexesCoveredFor(columnAlternatives, columnAlternativesAlreadyPrinted);
-//		
-//		for(ColumnAlternative columnAlternative : b) {
-//			if(a.indexOf(columnAlternative) == -1){
-//				System.out.println(columnAlternative.toString() + " is not covered for in 11");
-//			}
-//		}
-		
 		try {
 			new ProbabilityMultiThreader(8).printAndCalculate(columnAlternatives, columnAlternativesAlreadyPrinted);
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
 		System.out.println("Calculating total probabilities took: " + (System.nanoTime() - startTime) / 1000000000 + " seconds");
-	}
-
-	private static List<ColumnAlternative> checkIndexesCoveredFor(List<ColumnAlternative> columnAlternatives,
-			List<ColumnAlternative> columnAlternativesAlreadyPrinted)
-	{
-		
-		//TODO: Make use of multithreading
-		System.out.println("Checking covered for by 12...");
-
-		long count = 0;
-		List<ColumnAlternative> columnsCoveredFor11 = new ArrayList<ColumnAlternative>();
-		List<ColumnAlternative> columnsCoveredFor12 = new ArrayList<ColumnAlternative>();
-		List<ColumnAlternative> columnsCoveredFor13 = new ArrayList<ColumnAlternative>();
-		for(ColumnAlternative columnAlternative : columnAlternatives) {
-			count++;
-			if(count % 10000 == 0) {
-				System.out.println(count);
-			}
-			for(ColumnAlternative columnAlternativePrinted : columnAlternativesAlreadyPrinted) {
-				int difference = compareColumns(columnAlternativePrinted, columnAlternative, 3);
-				if(difference <= 2) {
-					if(columnsCoveredFor11.indexOf(columnAlternative) == -1) {
-						columnsCoveredFor11.add(columnAlternative);
-					}
-					if(difference <= 1) {
-						if(columnsCoveredFor12.indexOf(columnAlternative) == -1) {
-							columnsCoveredFor12.add(columnAlternative);
-						}
-						if(difference <= 0 && columnsCoveredFor13.size() < columnAlternativesAlreadyPrinted.size()) {
-							if(columnsCoveredFor13.indexOf(columnAlternative) == -1) {
-								columnsCoveredFor13.add(columnAlternative);
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		float probability11 = 0;
-		float probability12 = 0;
-		float probability13 = 0;
-		for(ColumnAlternative columnAlternative : columnsCoveredFor11) {
-			probability11 += columnAlternative.getProbability();
-		}
-		for(ColumnAlternative columnAlternative : columnsCoveredFor12) {
-			probability12 += columnAlternative.getProbability();
-		}
-		for(ColumnAlternative columnAlternative : columnsCoveredFor13) {
-			probability13 += columnAlternative.getProbability();
-		}
-		System.out.println(columnsCoveredFor11.size() + " rows are covered for 11 correct");
-		System.out.println("Total probability of 11 correct: " + probability11 * 100 + "%");
-		System.out.println(columnsCoveredFor12.size() + " rows are covered for 12 correct");
-		System.out.println("Total probability of 12 correct: " + probability12 * 100 + "%");
-		System.out.println(columnsCoveredFor13.size() + " rows are covered for 13 correct");
-		System.out.println("Total probability of 13 correct: " + probability13 * 100 + "%");
-		
-		return columnsCoveredFor11;
 	}
 
 	private static void assertTotalChance(List<ColumnAlternative> columnAlternatives) throws Exception
@@ -144,18 +74,6 @@ public class Main
 		}
 	}
 
-//	private static void print13(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
-//	{
-//		for(int i = 0; i < columnAlternatives.size(); i++) {
-//			if(i > 13) {
-//				break;
-//			}
-//			ColumnAlternative columnAlternative = columnAlternatives.get(i);
-//			System.out.println(columnAlternative.getProbability() * 100 + "%  " + columnAlternative.toString());
-//			columnAlternativesAlreadyPrinted.add(columnAlternative);
-//		}
-//	}
-	
 	private static void print13(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
 	{
 		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 13 - 13);
@@ -185,15 +103,14 @@ public class Main
 				continue;
 			}
 			ColumnAlternative columnAlternativeToAdd = getColumnToCoverFor(columnAlternative, columnAlternatives, columnsAlreadyPrinted, difference);
-			
-//			System.out.println("IndexChecked: " + i);
-//			System.out.println("IndexAdded: " + columnAlternatives.indexOf(columnAlternativeToAdd));
+
 			System.out.println(columnAlternativeToAdd.toString());
 			columnsAlreadyPrinted.add(columnAlternativeToAdd);
 		}
 	}
 
-	private static boolean isCoveredFor(ColumnAlternative columnAlternativeToCheck, List<ColumnAlternative> columnsAlreadyPrinted, int wantedDifference)
+	private static boolean isCoveredFor(ColumnAlternative columnAlternativeToCheck, List<ColumnAlternative> columnsAlreadyPrinted,
+			int wantedDifference)
 	{
 		for(ColumnAlternative columnAlreadyPrinted : columnsAlreadyPrinted) {
 			int difference = compareColumns(columnAlreadyPrinted, columnAlternativeToCheck, wantedDifference + 1);
@@ -238,7 +155,7 @@ public class Main
 		System.out.println("No matching column found, return column itself");
 		return columnAlternativeToCover;
 	}
-	
+
 	public static int compareColumns(ColumnAlternative columnAlternative1, ColumnAlternative columnAlternative2, int limit)
 	{
 		char[] first = columnAlternative1.toString().toLowerCase().toCharArray();
