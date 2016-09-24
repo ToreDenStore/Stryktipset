@@ -113,7 +113,7 @@ public class Main
 			int wantedDifference)
 	{
 		for(ColumnAlternative columnAlreadyPrinted : columnsAlreadyPrinted) {
-			int difference = compareColumns(columnAlreadyPrinted, columnAlternativeToCheck, wantedDifference + 1);
+			int difference = columnAlreadyPrinted.compareTo(columnAlternativeToCheck);
 			if(difference > wantedDifference) {
 				continue;
 			}
@@ -130,14 +130,14 @@ public class Main
 		for(int i = indexToStartAt; i < columnAlternatives.size(); i++) {
 			ColumnAlternative columnAlternativeInList = columnAlternatives.get(i);
 
-			int differenceToColumn = compareColumns(columnAlternativeInList, columnAlternativeToCover, wantedDifference + 1);
+			int differenceToColumn = columnAlternativeInList.compareTo(columnAlternativeToCover);
 			if(differenceToColumn > wantedDifference) {
 				continue;
 			}
 
 			boolean isOkayToAdd = true;
 			for(ColumnAlternative columnAlternativeAlreadyPrinted : columnsAlreadyPrinted) {
-				int differenceToAlreadyPrinted = compareColumns(columnAlternativeInList, columnAlternativeAlreadyPrinted, wantedDifference * 2 + 1);
+				int differenceToAlreadyPrinted = columnAlternativeInList.compareTo(columnAlternativeAlreadyPrinted);
 				if(differenceToAlreadyPrinted > Math.max(wantedDifference, 0)) {
 					continue;
 				} else {
@@ -154,23 +154,6 @@ public class Main
 
 		System.out.println("No matching column found, return column itself");
 		return columnAlternativeToCover;
-	}
-
-	public static int compareColumns(ColumnAlternative columnAlternative1, ColumnAlternative columnAlternative2, int limit)
-	{
-		char[] first = columnAlternative1.toString().toLowerCase().toCharArray();
-		char[] second = columnAlternative2.toString().toLowerCase().toCharArray();
-
-		int counter = 0;
-		for(int i1 = 0; i1 < first.length; i1++) {
-			if(first[i1] != second[i1]) {
-				counter++;
-				if(counter >= limit) {
-					break;
-				}
-			}
-		}
-		return counter;
 	}
 
 }

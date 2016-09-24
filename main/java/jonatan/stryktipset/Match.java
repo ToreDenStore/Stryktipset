@@ -42,6 +42,21 @@ public class Match
 		return _probability2;
 	}
 
+	public float getOdds1()
+	{
+		return _odds1;
+	}
+
+	public float getOddsX()
+	{
+		return _oddsX;
+	}
+
+	public float getOdds2()
+	{
+		return _odds2;
+	}
+
 	public float getProbability(Result result)
 	{
 		switch(result) {
