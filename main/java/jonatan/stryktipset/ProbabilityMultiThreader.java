@@ -55,7 +55,7 @@ public class ProbabilityMultiThreader
 					for(ColumnAlternative columnAlternative : shorterList) {
 						addToFinished();
 						for(ColumnAlternative columnAlternativePrinted : columnAlternativesAlreadyPrinted) {
-							int difference = Main.compareColumns(columnAlternativePrinted, columnAlternative, 3);
+							int difference = columnAlternativePrinted.compareTo(columnAlternative);
 							if(difference <= 2) {
 								if(!columnsCoveredFor11.contains(columnAlternative)) {
 									synchronized (columnsCoveredFor11) {
