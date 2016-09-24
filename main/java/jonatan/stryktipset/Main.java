@@ -10,6 +10,8 @@ import java.util.List;
 
 public class Main
 {
+	public static int NUMBER_OF_COLUMNS_PER_PAGE = 8;
+	public static String SEPARATOR = "\t";
 
 	public static void main(String[] args) throws IOException
 	{
@@ -22,8 +24,8 @@ public class Main
 			String line = buffReader.readLine();
 			while(line != null) {
 				System.out.println("LINE:\n" + line);
-				String[] matchArgs = line.split(";");
-				Match match = new Match(matchArgs[0], Float.parseFloat(matchArgs[1]), Float.parseFloat(matchArgs[2]), Float.parseFloat(matchArgs[3]));
+				String[] matchArgs = line.split(SEPARATOR);
+				Match match = new Match(Float.parseFloat(matchArgs[0]), Float.parseFloat(matchArgs[1]), Float.parseFloat(matchArgs[2]));
 				matches.add(match);
 				line = buffReader.readLine();
 			}
@@ -53,7 +55,7 @@ public class Main
 		print11(columnAlternatives, columnAlternativesAlreadyPrinted);
 		
 		long startTime = System.nanoTime();
-		List<ColumnAlternative> a = checkIndexesCoveredFor(columnAlternatives, columnAlternativesAlreadyPrinted);
+//		List<ColumnAlternative> a = checkIndexesCoveredFor(columnAlternatives, columnAlternativesAlreadyPrinted);
 		
 //		columnAlternativesAlreadyPrinted = new ArrayList<ColumnAlternative>();
 //		print12(columnAlternatives, columnAlternativesAlreadyPrinted);
@@ -65,11 +67,11 @@ public class Main
 //			}
 //		}
 		
-//		try {
-//			new ProbabilityMultiThreader(8).printAndCalculate(columnAlternatives, columnAlternativesAlreadyPrinted);
-//		} catch(InterruptedException e) {
-//			e.printStackTrace();
-//		}
+		try {
+			new ProbabilityMultiThreader(8).printAndCalculate(columnAlternatives, columnAlternativesAlreadyPrinted);
+		} catch(InterruptedException e) {
+			e.printStackTrace();
+		}
 		System.out.println("Calculating total probabilities took: " + (System.nanoTime() - startTime) / 1000000000 + " seconds");
 	}
 
@@ -175,7 +177,7 @@ public class Main
 
 		int origSize = columnsAlreadyPrinted.size();
 		for(int i = 0; i < columnAlternatives.size(); i++) {
-			if(columnsAlreadyPrinted.size() >= origSize + 12) {
+			if(columnsAlreadyPrinted.size() >= origSize + NUMBER_OF_COLUMNS_PER_PAGE) {
 				break;
 			}
 			ColumnAlternative columnAlternative = columnAlternatives.get(i);
