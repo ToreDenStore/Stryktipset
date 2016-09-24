@@ -2,7 +2,6 @@ package jonatan.stryktipset;
 
 public class Match
 {
-	private final String _name;
 	private final float _odds1;
 	private final float _oddsX;
 	private final float _odds2;
@@ -10,9 +9,8 @@ public class Match
 	private float _probabilityX;
 	private float _probability2;
 
-	public Match(String name, float input1, float inputX, float input2)
+	public Match(float input1, float inputX, float input2)
 	{
-		_name = name;
 		_odds1 = input1;
 		_oddsX = inputX;
 		_odds2 = input2;
@@ -29,11 +27,6 @@ public class Match
 		_probability2 = factor * 1 / odds2;
 	}
 
-	public String getName()
-	{
-		return _name;
-	}
-
 	public float getProbability1()
 	{
 		return _probability1;
@@ -47,6 +40,21 @@ public class Match
 	public float getProbability2()
 	{
 		return _probability2;
+	}
+
+	public float getOdds1()
+	{
+		return _odds1;
+	}
+
+	public float getOddsX()
+	{
+		return _oddsX;
+	}
+
+	public float getOdds2()
+	{
+		return _odds2;
 	}
 
 	public float getProbability(Result result)

@@ -77,4 +77,17 @@ public class ColumnAlternative
 
 	}
 
+	public int compareTo(ColumnAlternative columnAlternative)
+	{
+		int counter = 0;
+		for(int j = 0; j < _alternatives.size(); j++) {
+			RowAlternative rowAlternative = _alternatives.get(j);
+			RowAlternative rowAlternative2 = columnAlternative._alternatives.get(j);
+			if(!rowAlternative.equals(rowAlternative2)) {
+				counter++;
+			}
+		}
+		return counter;
+	}
+
 }
