@@ -13,19 +13,23 @@ public class Main
 {
 	public static String SEPARATOR = "\t";
 
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args)
+			throws IOException
 	{
 		System.out.println("Starting application");
-		
+
 		String inputDataLocation = args[0];
 		System.out.println("Loading input data from " + inputDataLocation);
 		List<Match> matches = new ArrayList<Match>();
 		try(BufferedReader buffReader = new BufferedReader(new FileReader(inputDataLocation));) {
 			String line = buffReader.readLine();
+			int matchat = 0;
 			while(line != null) {
-				System.out.println("LINE:\n" + line);
+				matchat++;
+				//System.out.println("LINE:\n" + line);
 				String[] matchArgs = line.split(SEPARATOR);
-				Match match = new Match(Float.parseFloat(matchArgs[0]), Float.parseFloat(matchArgs[1]), Float.parseFloat(matchArgs[2]));
+				Match match = new Match(matchat, Float.parseFloat(matchArgs[0]), Float.parseFloat(matchArgs[1]), Float.parseFloat(matchArgs[2]));
+				System.out.println(match);
 				matches.add(match);
 				line = buffReader.readLine();
 			}
@@ -35,7 +39,7 @@ public class Main
 		}
 
 		List<ColumnAlternative> columnAlternatives = new ColumnsCreator(matches).createColumns();
-		
+
 		System.out.println("Asserting...");
 		try {
 			assertTotalChance(columnAlternatives);
@@ -48,9 +52,10 @@ public class Main
 		List<ColumnAlternative> chosenColumns = weeklyBet.getChosenColumns();
 		for(ColumnAlternative columnAlternative : chosenColumns) {
 			columnAlternative.calculateProbability12(chosenColumns);
-			System.out.println(columnAlternative.toString() + " p13: " + columnAlternative.getProbability13() + " p12: " + columnAlternative.getProbability12());
+			System.out.println(columnAlternative.toString() + " p13: " + columnAlternative.getProbability13() + " p12: "
+					+ columnAlternative.getProbability12());
 		}
-		
+
 		long startTime = System.nanoTime();
 		try {
 			sumProbabilities(chosenColumns);
@@ -60,7 +65,8 @@ public class Main
 		System.out.println("Calculating total probabilities took: " + (System.nanoTime() - startTime) / 1000000000 + " seconds");
 	}
 
-	private static void assertTotalChance(List<ColumnAlternative> columnAlternatives) throws Exception
+	private static void assertTotalChance(List<ColumnAlternative> columnAlternatives)
+			throws Exception
 	{
 		float totalChance = 0;
 		for(ColumnAlternative columnAlternative : columnAlternatives) {
