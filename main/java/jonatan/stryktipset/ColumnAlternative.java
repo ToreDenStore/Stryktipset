@@ -23,7 +23,8 @@ public class ColumnAlternative
 
 	public List<RowAlternative> getRowAlternatives()
 	{
-		return _alternatives;
+		// Do not allow anybody to edit our rowalternatives!
+		return new ArrayList<>(_alternatives);
 	}
 
 	@Override
