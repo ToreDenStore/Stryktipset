@@ -8,7 +8,9 @@ public class ColumnAlternative
 {
 	private static final int MAXSIZE = 13;
 	private List<RowAlternative> _alternatives = new ArrayList<RowAlternative>();
-
+	private float _prob13 = -1;
+	private  float _prob12 = -1;
+	private  float _prob11 = -1;
 	public void addRowAlternative(RowAlternative rowAlternative, int i)
 	{
 		if(_alternatives.size() <= i) {
@@ -49,9 +51,45 @@ public class ColumnAlternative
 		}
 		return sb.toString();
 	}
+	public float getProbability(int numright) {
+		float tot = getProbability();
+		if (numright == 13)
+			return tot;
 
+		 if (numright == 12)
+		 {
+			 if (_prob12 != -1)
+			 	return _prob12;
+			 // 1*b*c+a*1*c+a*b*1 = bc+ac+ab = abc/a+abc/b+abc/c
+			 float t2 = 0;
+			 for(RowAlternative resultAlternative : _alternatives) {
+				 t2 += tot/ resultAlternative.getProbability();
+			 }
+			 _prob12 = t2;
+			 return t2;
+		 }
+
+		if (numright == 11)
+		{
+			if (_prob11 != -1)
+				return _prob11;
+			//1*1*c+a*1*1+1*b*1 = c+a+b = abc/ab+abc/bc+abc/ca
+			float t2 = 0;
+			for (int i = 0; i < 12; i++) {
+				for (int j = i+1; j < 13; j++) {
+					t2 += tot/ (_alternatives.get(i).getProbability()*_alternatives.get(j).getProbability());
+				}
+			}
+			_prob11 = t2;
+			return t2;
+		}
+		throw new IllegalArgumentException(String.format("Cannot handle %d right. Try 13, 12 or 11 right",numright));
+
+	}
 	public float getProbability()
 	{
+		if (_prob13 != -1)
+			return _prob13;
 		if(_alternatives.size() != MAXSIZE) {
 			throw new RuntimeException("Size is not 13, it is " + _alternatives.size());
 		}
@@ -59,17 +97,24 @@ public class ColumnAlternative
 		for(RowAlternative resultAlternative : _alternatives) {
 			probability = probability * resultAlternative.getProbability();
 		}
+		_prob13 = probability;
 		return probability;
 	}
 
 	public static class ColumnSorter implements Comparator<ColumnAlternative>
 	{
+		int numcorr;
+		public ColumnSorter(int numcorr) {
+			this.numcorr = numcorr;
+		}
 		@Override
 		public int compare(ColumnAlternative o1, ColumnAlternative o2)
 		{
-			if(o1.getProbability() > o2.getProbability()) {
+			float o1prob = o1.getProbability(numcorr);
+			float o2prob = o2.getProbability(numcorr);
+			if( o1prob > o2prob) {
 				return 1;
-			} else if(o1.getProbability() < o2.getProbability()) {
+			} else if(o1prob < o2prob) {
 				return -1;
 			} else {
 				return 0;
