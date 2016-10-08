@@ -57,21 +57,23 @@ public class ProbabilityMultiThreader
 						for(ColumnAlternative columnAlternativePrinted : columnAlternativesAlreadyPrinted) {
 							int difference = columnAlternativePrinted.compareTo(columnAlternative);
 							if(difference <= 2) {
-								if(!columnsCoveredFor11.contains(columnAlternative)) {
-									synchronized (columnsCoveredFor11) {
+								synchronized (columnsCoveredFor11) {
+									if(!columnsCoveredFor11.contains(columnAlternative)) {
 										columnsCoveredFor11.add(columnAlternative);
 									}
 								}
+
 								if(difference <= 1) {
-									if(!columnsCoveredFor12.contains(columnAlternative)) {
-										synchronized (columnsCoveredFor12) {
-											columnsCoveredFor12.add(columnAlternative);
+									synchronized (columnsCoveredFor12) {
+										if(!columnsCoveredFor12.contains(columnAlternative)) {
+												columnsCoveredFor12.add(columnAlternative);
 										}
 									}
 									if(difference <= 0 && _coveredFor13.get() < 39) {
-										if(!columnsCoveredFor13.contains(columnAlternative)) {
-											synchronized (columnsCoveredFor13) {
-												columnsCoveredFor13.add(columnAlternative);
+										synchronized (columnsCoveredFor13) {
+											if(!columnsCoveredFor13.contains(columnAlternative)) {
+													columnsCoveredFor13.add(columnAlternative);
+
 											}
 										}
 									}
@@ -84,7 +86,6 @@ public class ProbabilityMultiThreader
 			threads.add(thread);
 
 		}
-
 		for(Thread thread2 : threads) {
 			thread2.start();
 		}
