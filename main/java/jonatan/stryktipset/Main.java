@@ -48,14 +48,18 @@ public class Main
 			return;
 		}
 
-		System.out.println("Sorting columns...");
-		columnAlternatives.sort(new ColumnAlternative.ColumnSorter());
-		Collections.reverse(columnAlternatives);
-
+		System.out.println("Sorting columns for 13 right...");
+		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(13)));
 		List<ColumnAlternative> columnAlternativesAlreadyPrinted = new ArrayList<ColumnAlternative>();
-		print13(columnAlternatives, columnAlternativesAlreadyPrinted);
-		print12(columnAlternatives, columnAlternativesAlreadyPrinted);
-		print11(columnAlternatives, columnAlternativesAlreadyPrinted);
+		printAndSelect(columnAlternatives, columnAlternativesAlreadyPrinted,13);
+
+		System.out.println("Sorting columns for 12 right...");
+		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(12)));
+		printAndSelect(columnAlternatives, columnAlternativesAlreadyPrinted,12);
+
+		System.out.println("Sorting columns for 11 right...");
+		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(11)));
+		printAndSelect(columnAlternatives, columnAlternativesAlreadyPrinted,11);
 
 		long startTime = System.nanoTime();
 		try {
@@ -77,24 +81,10 @@ public class Main
 		}
 	}
 
-	private static void print13(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
+	private static void printAndSelect(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnsAlreadyPrinted, int numright)
 	{
-		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 13 - 13);
-	}
-
-	private static void print12(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
-	{
-		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 13 - 12);
-	}
-
-	private static void print11(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
-	{
-		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 13 - 11);
-	}
-
-	private static void printX(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnsAlreadyPrinted, int difference)
-	{
-		System.out.println("\nPrinting " + (13 - difference) + ":");
+		int difference = 13-numright;
+		System.out.println("\nPrinting " + numright + ":");
 
 		int origSize = columnsAlreadyPrinted.size();
 		for(int i = 0; i < columnAlternatives.size(); i++) {
