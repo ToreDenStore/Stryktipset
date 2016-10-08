@@ -2,6 +2,7 @@ package jonatan.stryktipset;
 
 public class Match
 {
+	private final int id;
 	private final float _odds1;
 	private final float _oddsX;
 	private final float _odds2;
@@ -9,13 +10,18 @@ public class Match
 	private float _probabilityX;
 	private float _probability2;
 
-	public Match(float input1, float inputX, float input2)
+	public Match(int match_id,float input1, float inputX, float input2)
 	{
+		id = match_id;
 		_odds1 = input1;
 		_oddsX = inputX;
 		_odds2 = input2;
 
 		calculateProbabilites(_odds1, _oddsX, _odds2);
+	}
+
+	public String toString() {
+		return String.format("Match %3d: %5.2f %5.2f %5.2f",id , _probability1, _probabilityX,_probability2);
 	}
 
 	private void calculateProbabilites(float odds1, float oddsX, float odds2)
@@ -25,6 +31,10 @@ public class Match
 		_probability1 = factor * 1 / odds1;
 		_probabilityX = factor * 1 / oddsX;
 		_probability2 = factor * 1 / odds2;
+		float totalProbability = _probability1+_probabilityX+_probability2;
+		if (totalProbability > 1+1e-6 || totalProbability < 1-1e-6) {
+			throw new RuntimeException(String.format("Total probability of match %d is not close to 1 ( %f )",id,totalProbability));
+		}
 	}
 
 	public float getProbability1()

@@ -22,10 +22,13 @@ public class Main
 		List<Match> matches = new ArrayList<Match>();
 		try(BufferedReader buffReader = new BufferedReader(new FileReader(inputDataLocation));) {
 			String line = buffReader.readLine();
+			int matchat = 0;
 			while(line != null) {
-				System.out.println("LINE:\n" + line);
+				matchat++;
+				//System.out.println("LINE:\n" + line);
 				String[] matchArgs = line.split(SEPARATOR);
-				Match match = new Match(Float.parseFloat(matchArgs[0]), Float.parseFloat(matchArgs[1]), Float.parseFloat(matchArgs[2]));
+				Match match = new Match(matchat,Float.parseFloat(matchArgs[0]), Float.parseFloat(matchArgs[1]), Float.parseFloat(matchArgs[2]));
+				System.out.println(match);
 				matches.add(match);
 				line = buffReader.readLine();
 			}
