@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Main
 {
@@ -25,7 +23,6 @@ public class Main
 			int matchat = 0;
 			while(line != null) {
 				matchat++;
-				//System.out.println("LINE:\n" + line);
 				String[] matchArgs = line.split(SEPARATOR);
 				Match match = new Match(matchat,Float.parseFloat(matchArgs[0]), Float.parseFloat(matchArgs[1]), Float.parseFloat(matchArgs[2]));
 				System.out.println(match);
@@ -38,46 +35,108 @@ public class Main
 		}
 
 		ColumnsCreator columnsCreator = new ColumnsCreator(matches);
-		columnsCreator.createColumns();
+		columnsCreator.createColumns(5e-6); //Don't build rows with odds less than 5e-6
 		List<ColumnAlternative> columnAlternatives = columnsCreator.getColumnAlternatives();
-
-		try {
-			assertTotalChance(columnAlternatives);
-		} catch(Exception e) {
-			e.printStackTrace();
-			return;
-		}
-
-		System.out.println("Sorting columns for 13 right...");
 		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(13)));
-		List<ColumnAlternative> columnAlternativesAlreadyPrinted = new ArrayList<ColumnAlternative>();
-		printAndSelect(columnAlternatives, columnAlternativesAlreadyPrinted,13);
 
-		System.out.println("Sorting columns for 12 right...");
-		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(12)));
-		printAndSelect(columnAlternatives, columnAlternativesAlreadyPrinted,12);
 
-		System.out.println("Sorting columns for 11 right...");
-		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(11)));
-		printAndSelect(columnAlternatives, columnAlternativesAlreadyPrinted,11);
+		//assertTotalChance(columnAlternatives);
+
+
+		List<ColumnAlternative> selectedColumns;
+
 
 		long startTime = System.nanoTime();
 		try {
-			new ProbabilityMultiThreader(8).printAndCalculate(columnAlternatives, columnAlternativesAlreadyPrinted);
+			selectedColumns = topCategories(columnAlternatives);
+			//selectedColumns = bruteforceBest(columnsCreator, columnAlternatives);
+			columnAlternatives = columnsCreator.buildAlternativesFor(selectedColumns);
+			new ProbabilityMultiThreader(4).printAndCalculate(columnAlternatives, selectedColumns);
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Calculating total probabilities took: " + (System.nanoTime() - startTime) / 1000000000 + " seconds");
+		System.out.println(String.format("Calculating total probabilities took: %.3f seconds",(System.nanoTime() - startTime) / 1000000000.0));
 	}
 
-	private static void assertTotalChance(List<ColumnAlternative> columnAlternatives) throws Exception
+	private static List<ColumnAlternative> topCategories(List<ColumnAlternative> columnAlternatives) {
+		System.out.println("Sorting columns for 13 right...");
+		List<ColumnAlternative> selectedColumns = new ArrayList<ColumnAlternative>();
+		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(13)));
+		printAndSelect(columnAlternatives, selectedColumns,13);
+
+		System.out.println("Sorting columns for 12 right...");
+		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(12)));
+		printAndSelect(columnAlternatives, selectedColumns,12);
+
+		System.out.println("Sorting columns for 11 right...");
+		columnAlternatives.sort(Collections.reverseOrder(new ColumnAlternative.ColumnSorter(11)));
+		printAndSelect(columnAlternatives, selectedColumns,11);
+		return selectedColumns;
+	}
+
+	private static List<ColumnAlternative> bruteforceBest(ColumnsCreator columnsCreator, List<ColumnAlternative> columnAlternatives) throws InterruptedException {
+		List<ColumnAlternative> selectedColumns = new ArrayList<>();
+		Map<ColumnAlternative,List<ColumnAlternative>> forselected = new HashMap<>();
+
+		columnAlternatives = columnAlternatives.subList(0,50);
+		for (ColumnAlternative columnAlternative : columnAlternatives) {
+            selectedColumns.add(columnAlternative);
+            forselected.put(columnAlternative, columnsCreator.buildAlternativesFor(selectedColumns));
+            selectedColumns.clear();
+        }
+
+		for (int i = 0; i < NUMBER_OF_COLUMNS_PER_PAGE; i++) {
+            double best = 0;
+            ColumnAlternative na = null,nb = null,nc = null;
+
+            for (int j = 0; j < columnAlternatives.size(); j++) {
+                ColumnAlternative a = columnAlternatives.get(j);
+                if (selectedColumns.contains(a))
+                    continue;
+                selectedColumns.add(a);
+                for (int k = j+1; k < columnAlternatives.size(); k++) {
+                    ColumnAlternative b = columnAlternatives.get(k);
+                    if (selectedColumns.contains(b))
+                        continue;
+                    selectedColumns.add(b);
+                    for (int l = k+1; l < columnAlternatives.size(); l++) {
+                        ColumnAlternative c = columnAlternatives.get(l);
+                        if (selectedColumns.contains(c))
+                            continue;
+                        selectedColumns.add(c);
+                        ArrayList<ColumnAlternative> localAlts = (ArrayList)columnsCreator.buildAlternativesFor(selectedColumns);
+                        selectedColumns.remove(selectedColumns.size()-1);
+                        double vv = new ProbabilityMultiThreader(4).printAndCalculate(localAlts, selectedColumns);
+                        if (vv > best)
+                        {
+                            best = vv;
+                            na = a;
+                            nb = b;
+                            nc = c;
+
+                        }
+                    }
+                    selectedColumns.remove(selectedColumns.size()-1);
+                }
+                selectedColumns.remove(selectedColumns.size()-1);
+            }
+            selectedColumns.add(na);
+            selectedColumns.add(nb);
+            selectedColumns.add(nc);
+
+            System.out.println("Vv: " + best);
+        }
+        return selectedColumns;
+	}
+
+	private static void assertTotalChance(List<ColumnAlternative> columnAlternatives)
 	{
-		float totalChance = 0;
+		double totalChance = 0;
 		for(ColumnAlternative columnAlternative : columnAlternatives) {
 			totalChance += columnAlternative.getProbability();
 		}
-		if(totalChance > 1.01 || totalChance < 0.99) {
-			throw new Exception("Total chance is not 1, it is " + totalChance);
+		if(totalChance > 1.0 + 1e-13 || totalChance < 1-1e-13) {
+			throw new RuntimeException("Total chance is not 1, it is " + totalChance);
 		}
 	}
 
@@ -116,7 +175,7 @@ public class Main
 	}
 
 	private static ColumnAlternative getColumnToCoverFor(ColumnAlternative columnAlternativeToCover, List<ColumnAlternative> columnAlternatives,
-			List<ColumnAlternative> columnsAlreadyPrinted, int wantedDifference)
+			List<ColumnAlternative> selectedColumns, int wantedDifference)
 	{
 		int indexToStartAt = columnAlternatives.indexOf(columnAlternativeToCover);
 
@@ -129,7 +188,7 @@ public class Main
 			}
 
 			boolean isOkayToAdd = true;
-			for(ColumnAlternative columnAlternativeAlreadyPrinted : columnsAlreadyPrinted) {
+			for(ColumnAlternative columnAlternativeAlreadyPrinted : selectedColumns) {
 				int differenceToAlreadyPrinted = columnAlternativeInList.compareTo(columnAlternativeAlreadyPrinted);
 				if(differenceToAlreadyPrinted > Math.max(wantedDifference, 0)) {
 					continue;

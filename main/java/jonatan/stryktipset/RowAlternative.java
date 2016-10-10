@@ -11,7 +11,7 @@ public class RowAlternative
 		_result = result;
 	}
 
-	public float getProbability()
+	public double getProbability()
 	{
 		return _match.getProbability(_result);
 	}
@@ -24,6 +24,11 @@ public class RowAlternative
 	public Result getResult()
 	{
 		return _result;
+	}
+
+	@Override
+	public int hashCode() {
+		return _match.hashCode()^_result.hashCode();
 	}
 
 	@Override

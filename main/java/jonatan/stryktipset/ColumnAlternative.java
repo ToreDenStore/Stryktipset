@@ -1,32 +1,39 @@
 package jonatan.stryktipset;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class ColumnAlternative
+public class ColumnAlternative implements Cloneable
 {
-	private static final int MAXSIZE = 13;
-	private List<RowAlternative> _alternatives = new ArrayList<RowAlternative>();
-	private float _prob13 = -1;
-	private  float _prob12 = -1;
-	private  float _prob11 = -1;
-	public void addRowAlternative(RowAlternative rowAlternative, int i)
+	public static final int MAXSIZE = 13;
+	private final RowAlternative[] _alternatives;
+	private double _prob13 = -1;
+	private double _prob12 = -1;
+	private double _prob11 = -1;
+
+    private ColumnAlternative(RowAlternative[] clone) {
+        if (clone.length != MAXSIZE)
+            throw new RuntimeException("Cannot clone less or more than 13 rows");
+        _alternatives = clone;
+    }
+    public ColumnAlternative() {
+        _alternatives = new RowAlternative[MAXSIZE];
+    }
+
+    public void setRowAlternative(RowAlternative rowAlternative, int i)
 	{
-		if(_alternatives.size() <= i) {
-			_alternatives.add(rowAlternative);
-		} else {
-			_alternatives.set(i, rowAlternative);
-		}
-		if(_alternatives.size() > MAXSIZE) {
+        _alternatives[i] = rowAlternative;
+		if(i > MAXSIZE) {
 			throw new RuntimeException("Cannot add more than 13 rows");
 		}
 	}
 
-	public List<RowAlternative> getRowAlternatives()
+	public RowAlternative[] getRowAlternatives()
 	{
 		// Do not allow anybody to edit our rowalternatives!
-		return new ArrayList<>(_alternatives);
+		return _alternatives;
 	}
 
 	@Override
@@ -51,8 +58,8 @@ public class ColumnAlternative
 		}
 		return sb.toString();
 	}
-	public float getProbability(int numright) {
-		float tot = getProbability();
+	public double getProbability(int numright) {
+		double tot = getProbability();
 		if (numright == 13)
 			return tot;
 
@@ -61,7 +68,7 @@ public class ColumnAlternative
 			 if (_prob12 != -1)
 			 	return _prob12;
 			 // 1*b*c+a*1*c+a*b*1 = bc+ac+ab = abc/a+abc/b+abc/c
-			 float t2 = 0;
+			 double t2 = 0;
 			 for(RowAlternative resultAlternative : _alternatives) {
 				 t2 += tot/ resultAlternative.getProbability();
 			 }
@@ -74,10 +81,10 @@ public class ColumnAlternative
 			if (_prob11 != -1)
 				return _prob11;
 			//1*1*c+a*1*1+1*b*1 = c+a+b = abc/ab+abc/bc+abc/ca
-			float t2 = 0;
+			double t2 = 0;
 			for (int i = 0; i < 12; i++) {
 				for (int j = i+1; j < 13; j++) {
-					t2 += tot/ (_alternatives.get(i).getProbability()*_alternatives.get(j).getProbability());
+					t2 += tot/ (_alternatives[i].getProbability()*_alternatives[j].getProbability());
 				}
 			}
 			_prob11 = t2;
@@ -86,22 +93,23 @@ public class ColumnAlternative
 		throw new IllegalArgumentException(String.format("Cannot handle %d right. Try 13, 12 or 11 right",numright));
 
 	}
-	public float getProbability()
+	public double getProbability()
 	{
 		if (_prob13 != -1)
 			return _prob13;
-		if(_alternatives.size() != MAXSIZE) {
-			throw new RuntimeException("Size is not 13, it is " + _alternatives.size());
-		}
-		float probability = 1;
-		for(RowAlternative resultAlternative : _alternatives) {
-			probability = probability * resultAlternative.getProbability();
-		}
+
+		double probability = 1;
+        for (int i = 0; i < _alternatives.length; i++) {
+            probability = probability * _alternatives[i].getProbability();
+
+        }
 		_prob13 = probability;
 		return probability;
 	}
 
-	public static class ColumnSorter implements Comparator<ColumnAlternative>
+
+
+    public static class ColumnSorter implements Comparator<ColumnAlternative>
 	{
 		int numcorr;
 		public ColumnSorter(int numcorr) {
@@ -110,30 +118,59 @@ public class ColumnAlternative
 		@Override
 		public int compare(ColumnAlternative o1, ColumnAlternative o2)
 		{
-			float o1prob = o1.getProbability(numcorr);
-			float o2prob = o2.getProbability(numcorr);
-			if( o1prob > o2prob) {
-				return 1;
-			} else if(o1prob < o2prob) {
-				return -1;
-			} else {
-				return 0;
-			}
+			return compare(o1,o2,numcorr);
 		}
 
+        private int compare(ColumnAlternative o1, ColumnAlternative o2, int numcorr) {
+            double o1prob = o1.getProbability(numcorr);
+            double o2prob = o2.getProbability(numcorr);
+            if( o1prob > o2prob) {
+                return 1;
+            } else if(o1prob < o2prob) {
+                return -1;
+            } else {
+                if (numcorr == 13)
+                    return 0;
+                // So they are equal in the n right sense, but then we'd rather
+                // take the one that is better in the n+1 right sense.
+                return compare(o1,o2,numcorr+1);
+            }
+        }
+
+    }
+
+    public int compareTo(ColumnAlternative columnAlternative, int max) {
+        int counter = 0;
+        for (int i = 0; i < _alternatives.length; i++) {
+            RowAlternative alternative = _alternatives[i];
+            RowAlternative alternative2 = columnAlternative._alternatives[i];
+            if(!alternative.equals(alternative2)) {
+                counter++;
+                if (counter == max)
+                    break;
+            }
+        }
+        return counter;
+    }
+
+	public int compareTo(ColumnAlternative columnAlternative) {
+        return compareTo(columnAlternative, ColumnAlternative.MAXSIZE);
+    }
+
+	protected ColumnAlternative clone() {
+		return new ColumnAlternative(this._alternatives.clone());
 	}
 
-	public int compareTo(ColumnAlternative columnAlternative)
-	{
-		int counter = 0;
-		for(int j = 0; j < _alternatives.size(); j++) {
-			RowAlternative rowAlternative = _alternatives.get(j);
-			RowAlternative rowAlternative2 = columnAlternative._alternatives.get(j);
-			if(!rowAlternative.equals(rowAlternative2)) {
-				counter++;
-			}
-		}
-		return counter;
-	}
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(this._alternatives);
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ColumnAlternative))
+            return false;
+
+        return compareTo((ColumnAlternative)o,1) == 0;
+    }
 }

@@ -1,16 +1,23 @@
 package jonatan.stryktipset;
 
+import java.math.BigDecimal;
+
 public class Match
 {
 	private final int id;
 	private final float _odds1;
 	private final float _oddsX;
 	private final float _odds2;
-	private float _probability1;
-	private float _probabilityX;
-	private float _probability2;
+	private double _probability1;
+	private double _probabilityX;
+	private double _probability2;
 
-	public Match(int match_id,float input1, float inputX, float input2)
+	@Override
+	public int hashCode() {
+		return id ^ Float.hashCode(_odds1) ^ Float.hashCode(_oddsX) ^ Float.hashCode(_odds2);
+	}
+
+	public Match(int match_id, float input1, float inputX, float input2)
 	{
 		id = match_id;
 		_odds1 = input1;
@@ -24,30 +31,39 @@ public class Match
 		return String.format("Match %3d: %5.2f %5.2f %5.2f",id , _probability1, _probabilityX,_probability2);
 	}
 
-	private void calculateProbabilites(float odds1, float oddsX, float odds2)
+	private void calculateProbabilites(double odds1, double oddsX, double odds2)
 	{
-		float total = 1 / odds1 + 1 / oddsX + 1 / odds2;
-		float factor = 1 / total;
-		_probability1 = factor * 1 / odds1;
-		_probabilityX = factor * 1 / oddsX;
-		_probability2 = factor * 1 / odds2;
-		float totalProbability = _probability1+_probabilityX+_probability2;
-		if (totalProbability > 1+1e-6 || totalProbability < 1-1e-6) {
-			throw new RuntimeException(String.format("Total probability of match %d is not close to 1 ( %f )",id,totalProbability));
+		// More accurate version of (1/ ( 1 / odds1 + 1 / oddsX + 1 / odds2 ) ) * 1/odds1
+		// Accuracy achieved by working with larger numbers
+		double tot = odds1*oddsX+odds1*odds2+oddsX*odds2;
+
+		//double total = 1 / odds1 + 1 / oddsX + 1 / odds2;
+		//double factor = 1 / total;
+		_probability1 = oddsX*odds2/tot;
+		_probabilityX = odds1*odds2/tot;
+		_probability2 = odds1*oddsX/tot;
+		/*
+		_probability1 = factor * 1/odds1;
+		_probabilityX = factor * 1/oddsX;
+		_probability2 = factor * 1/odds2;
+		*/
+		double totalProbability = _probability1+_probabilityX+_probability2;
+		if (totalProbability > 1+1e-20 || totalProbability < 1-1e-20) {
+			throw new RuntimeException(String.format("Total probability of match %d is not close to 1 ( %.20f )",id,totalProbability));
 		}
 	}
 
-	public float getProbability1()
+	public double getProbability1()
 	{
 		return _probability1;
 	}
 
-	public float getProbabilityX()
+	public double getProbabilityX()
 	{
 		return _probabilityX;
 	}
 
-	public float getProbability2()
+	public double getProbability2()
 	{
 		return _probability2;
 	}
@@ -67,7 +83,7 @@ public class Match
 		return _odds2;
 	}
 
-	public float getProbability(Result result)
+	public double getProbability(Result result)
 	{
 		switch(result) {
 		case _1:
@@ -80,4 +96,7 @@ public class Match
 		return 0;
 	}
 
+	public int getId() {
+		return id;
+	}
 }

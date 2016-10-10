@@ -2,19 +2,14 @@ package jonatan.stryktipset;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ProbabilityMultiThreader
 {
 	private int _numberOfThreads;
-
-	AtomicInteger _coveredFor11 = new AtomicInteger();
-	AtomicFloat _probability11 = new AtomicFloat();
-	AtomicInteger _coveredFor12 = new AtomicInteger();
-	AtomicFloat _probability12 = new AtomicFloat();
-	AtomicInteger _coveredFor13 = new AtomicInteger();
-	AtomicFloat _probability13 = new AtomicFloat();
 
 	AtomicLong _columnsFinished = new AtomicLong();
 
@@ -31,14 +26,13 @@ public class ProbabilityMultiThreader
 		}
 	}
 
-	public void printAndCalculate(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
+	public double printAndCalculate(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
 			throws InterruptedException
 	{
 		System.out.println("Checking covered for by 12...");
-
-		List<ColumnAlternative> columnsCoveredFor11 = new ArrayList<ColumnAlternative>();
-		List<ColumnAlternative> columnsCoveredFor12 = new ArrayList<ColumnAlternative>();
-		List<ColumnAlternative> columnsCoveredFor13 = new ArrayList<ColumnAlternative>();
+		Queue<ColumnAlternative> columnsCoveredFor11 = new ConcurrentLinkedQueue<ColumnAlternative>();
+		Queue<ColumnAlternative> columnsCoveredFor12 = new ConcurrentLinkedQueue<ColumnAlternative>();
+		Queue<ColumnAlternative> columnsCoveredFor13 = new ConcurrentLinkedQueue<ColumnAlternative>();
 
 		List<Thread> threads = new ArrayList<Thread>();
 		for(int i = 0; i < _numberOfThreads; i++) {
@@ -50,53 +44,60 @@ public class ProbabilityMultiThreader
 				public void run()
 				{
 					int part = columnAlternatives.size() / _numberOfThreads;
-					List<ColumnAlternative> shorterList = columnAlternatives.subList(threadNumber * part, (threadNumber + 1) * part);
+					int start = threadNumber * part;
+					int end = (threadNumber + 1) * part;
+					if (_numberOfThreads == threadNumber+1)
+						end = columnAlternatives.size();
 
+					List<ColumnAlternative> shorterList = columnAlternatives.subList(start, end);
 					for(ColumnAlternative columnAlternative : shorterList) {
+						boolean added11 = false;
+						boolean added12 = false;
+						boolean added13 = false;
+
 						addToFinished();
 						for(ColumnAlternative columnAlternativePrinted : columnAlternativesAlreadyPrinted) {
-							int difference = columnAlternativePrinted.compareTo(columnAlternative);
-							if(difference <= 2) {
-								synchronized (columnsCoveredFor11) {
-									if(!columnsCoveredFor11.contains(columnAlternative)) {
-										columnsCoveredFor11.add(columnAlternative);
-									}
-								}
+							if (added11 && added12 && added13)
+								break;
 
-								if(difference <= 1) {
-									synchronized (columnsCoveredFor12) {
-										if(!columnsCoveredFor12.contains(columnAlternative)) {
-												columnsCoveredFor12.add(columnAlternative);
-										}
-									}
-									if(difference <= 0 && _coveredFor13.get() < 39) {
-										synchronized (columnsCoveredFor13) {
-											if(!columnsCoveredFor13.contains(columnAlternative)) {
-													columnsCoveredFor13.add(columnAlternative);
+							int difference = columnAlternativePrinted.compareTo(columnAlternative,3);
 
-											}
-										}
-									}
-								}
+							if(difference <= 0) {
+								columnsCoveredFor13.add(columnAlternative);
+								added13 = true;
+								continue; //Won't get money for 11 or 12 right for this column
 							}
+
+							if(!added12 && difference <= 1) {
+								columnsCoveredFor12.add(columnAlternative);
+								added12 = true;
+								continue; //Won't get money for 11 right on this one
+							}
+
+							if(!added11 && difference <= 2) {
+								columnsCoveredFor11.add(columnAlternative);
+								added11 = true;
+							}
+
+
 						}
 					}
 				}
 			};
+			thread.start();
+
 			threads.add(thread);
-
-		}
-		for(Thread thread2 : threads) {
-			thread2.start();
 		}
 
-		for(Thread thread2 : threads) {
-			thread2.join();
+		for(Thread thread : threads) {
+			thread.join();
 		}
+		if (_columnsFinished.get() != columnAlternatives.size())
+			throw new RuntimeException("Did not process all columns!");
 
-		float probability11 = 0;
-		float probability12 = 0;
-		float probability13 = 0;
+		double probability11 = 0;
+		double probability12 = 0;
+		double probability13 = 0;
 		for(ColumnAlternative columnAlternative : columnsCoveredFor11) {
 			probability11 += columnAlternative.getProbability();
 		}
@@ -112,5 +113,8 @@ public class ProbabilityMultiThreader
 		System.out.println("Total probability of 12 correct: " + probability12 * 100 + "%");
 		System.out.println(columnsCoveredFor13.size() + " rows are covered for 13 correct");
 		System.out.println("Total probability of 13 correct: " + probability13 * 100 + "%");
+		double vv = probability11*100+probability12*1000+probability13*100000;
+		System.out.println(String.format("Väntevärde: %.2f",vv));
+		return vv;
 	}
 }
