@@ -5,18 +5,18 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Main
 {
-	public static int NUMBER_OF_COLUMNS_PER_PAGE = 8;
 	public static String SEPARATOR = "\t";
 
 	public static void main(String[] args) throws IOException
 	{
 		System.out.println("Starting application");
-
+		
 		String inputDataLocation = args[0];
 		System.out.println("Loading input data from " + inputDataLocation);
 		List<Match> matches = new ArrayList<Match>();
@@ -34,10 +34,9 @@ public class Main
 			System.out.println("Input file not found");
 		}
 
-		ColumnsCreator columnsCreator = new ColumnsCreator(matches);
-		columnsCreator.createColumns();
-		List<ColumnAlternative> columnAlternatives = columnsCreator.getColumnAlternatives();
-
+		List<ColumnAlternative> columnAlternatives = new ColumnsCreator(matches).createColumns();
+		
+		System.out.println("Asserting...");
 		try {
 			assertTotalChance(columnAlternatives);
 		} catch(Exception e) {
@@ -45,18 +44,16 @@ public class Main
 			return;
 		}
 
-		System.out.println("Sorting columns...");
-		columnAlternatives.sort(new ColumnAlternative.ColumnSorter());
-		Collections.reverse(columnAlternatives);
-
-		List<ColumnAlternative> columnAlternativesAlreadyPrinted = new ArrayList<ColumnAlternative>();
-		print13(columnAlternatives, columnAlternativesAlreadyPrinted);
-		print12(columnAlternatives, columnAlternativesAlreadyPrinted);
-		print11(columnAlternatives, columnAlternativesAlreadyPrinted);
-
+		WeeklyBet weeklyBet = new WeeklyBet(columnAlternatives, 12, 12, 12);
+		List<ColumnAlternative> chosenColumns = weeklyBet.getChosenColumns();
+		for(ColumnAlternative columnAlternative : chosenColumns) {
+			columnAlternative.calculateProbability12(chosenColumns);
+			System.out.println(columnAlternative.toString() + " p13: " + columnAlternative.getProbability13() + " p12: " + columnAlternative.getProbability12());
+		}
+		
 		long startTime = System.nanoTime();
 		try {
-			new ProbabilityMultiThreader(8).printAndCalculate(columnAlternatives, columnAlternativesAlreadyPrinted);
+			sumProbabilities(chosenColumns);
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -67,93 +64,46 @@ public class Main
 	{
 		float totalChance = 0;
 		for(ColumnAlternative columnAlternative : columnAlternatives) {
-			totalChance += columnAlternative.getProbability();
+			totalChance += columnAlternative.getProbability13();
 		}
 		if(totalChance > 1.01 || totalChance < 0.99) {
 			throw new Exception("Total chance is not 1, it is " + totalChance);
 		}
 	}
 
-	private static void print13(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
+	private static void sumProbabilities(List<ColumnAlternative> chosenColumns)
+			throws InterruptedException
 	{
-		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 13 - 13);
-	}
+		System.out.println("Checking covered for by 12...");
 
-	private static void print12(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
-	{
-		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 13 - 12);
-	}
+		Set<ColumnAlternative> columnsCoveredFor11 = new HashSet<ColumnAlternative>();
+		Set<ColumnAlternative> columnsCoveredFor12 = new HashSet<ColumnAlternative>();
+		Set<ColumnAlternative> columnsCoveredFor13 = new HashSet<ColumnAlternative>();
 
-	private static void print11(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnAlternativesAlreadyPrinted)
-	{
-		printX(columnAlternatives, columnAlternativesAlreadyPrinted, 13 - 11);
-	}
-
-	private static void printX(List<ColumnAlternative> columnAlternatives, List<ColumnAlternative> columnsAlreadyPrinted, int difference)
-	{
-		System.out.println("\nPrinting " + (13 - difference) + ":");
-
-		int origSize = columnsAlreadyPrinted.size();
-		for(int i = 0; i < columnAlternatives.size(); i++) {
-			if(columnsAlreadyPrinted.size() >= origSize + NUMBER_OF_COLUMNS_PER_PAGE) {
-				break;
-			}
-			ColumnAlternative columnAlternative = columnAlternatives.get(i);
-			if(isCoveredFor(columnAlternative, columnsAlreadyPrinted, difference)) {
-				continue;
-			}
-			ColumnAlternative columnAlternativeToAdd = getColumnToCoverFor(columnAlternative, columnAlternatives, columnsAlreadyPrinted, difference);
-
-			System.out.println(columnAlternativeToAdd.toString());
-			columnsAlreadyPrinted.add(columnAlternativeToAdd);
-		}
-	}
-
-	private static boolean isCoveredFor(ColumnAlternative columnAlternativeToCheck, List<ColumnAlternative> columnsAlreadyPrinted,
-			int wantedDifference)
-	{
-		for(ColumnAlternative columnAlreadyPrinted : columnsAlreadyPrinted) {
-			int difference = columnAlreadyPrinted.compareTo(columnAlternativeToCheck);
-			if(difference > wantedDifference) {
-				continue;
-			}
-			return true;
-		}
-		return false;
-	}
-
-	private static ColumnAlternative getColumnToCoverFor(ColumnAlternative columnAlternativeToCover, List<ColumnAlternative> columnAlternatives,
-			List<ColumnAlternative> columnsAlreadyPrinted, int wantedDifference)
-	{
-		int indexToStartAt = columnAlternatives.indexOf(columnAlternativeToCover);
-
-		for(int i = indexToStartAt; i < columnAlternatives.size(); i++) {
-			ColumnAlternative columnAlternativeInList = columnAlternatives.get(i);
-
-			int differenceToColumn = columnAlternativeInList.compareTo(columnAlternativeToCover);
-			if(differenceToColumn > wantedDifference) {
-				continue;
-			}
-
-			boolean isOkayToAdd = true;
-			for(ColumnAlternative columnAlternativeAlreadyPrinted : columnsAlreadyPrinted) {
-				int differenceToAlreadyPrinted = columnAlternativeInList.compareTo(columnAlternativeAlreadyPrinted);
-				if(differenceToAlreadyPrinted > Math.max(wantedDifference, 0)) {
-					continue;
-				} else {
-					isOkayToAdd = false;
-					break;
-				}
-			}
-
-			if(isOkayToAdd) {
-				return columnAlternativeInList;
-			}
-
+		for(ColumnAlternative columnAlternativePrinted : chosenColumns) {
+			columnsCoveredFor13.add(columnAlternativePrinted);
+			columnsCoveredFor12.addAll(columnAlternativePrinted.getCoveredFor12());
+			//TODO: Add 11
 		}
 
-		System.out.println("No matching column found, return column itself");
-		return columnAlternativeToCover;
+		float probability11 = 0;
+		float probability12 = 0;
+		float probability13 = 0;
+		for(ColumnAlternative columnAlternative : columnsCoveredFor11) {
+			probability11 += columnAlternative.getProbability11();
+		}
+		for(ColumnAlternative columnAlternative : columnsCoveredFor12) {
+			probability12 += columnAlternative.getProbability12();
+			System.out.println(columnAlternative.toString());
+		}
+		for(ColumnAlternative columnAlternative : columnsCoveredFor13) {
+			probability13 += columnAlternative.getProbability13();
+		}
+		System.out.println(columnsCoveredFor11.size() + " rows are covered for 11 correct");
+		System.out.println("Total probability of 11 correct: " + probability11 * 100 + "%");
+		System.out.println(columnsCoveredFor12.size() + " rows are covered for 12 correct");
+		System.out.println("Total probability of 12 correct: " + probability12 * 100 + "%");
+		System.out.println(columnsCoveredFor13.size() + " rows are covered for 13 correct");
+		System.out.println("Total probability of 13 correct: " + probability13 * 100 + "%");
 	}
-
 }
