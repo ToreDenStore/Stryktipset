@@ -14,13 +14,14 @@ public class ColumnsCreator
 		_columnAlternatives = new ArrayList<ColumnAlternative>();
 	}
 
-	public void createColumns()
+	public List<ColumnAlternative> createColumns()
 	{
 		System.out.println("Creating columns...");
 		createRow(null, 0, 0);
 		createRow(null, 0, 1);
 		createRow(null, 0, 2);
 		System.out.println("Created " + _columnAlternatives.size() + " columns");
+		return _columnAlternatives;
 	}
 
 	private void createRow(ColumnAlternative columnAlternative, int i, int j)
@@ -46,25 +47,11 @@ public class ColumnsCreator
 			createRow(columnAlternative, i, 1);
 			createRow(columnAlternative, i, 2);
 		} else {
-			_columnAlternatives.add(cloneColumn(columnAlternative));
+			ColumnAlternative column = columnAlternative.cloneColumn();
+			_columnAlternatives.add(column);
 			if(_columnAlternatives.size() % 100000 == 0) {
 				System.out.println("Created " + _columnAlternatives.size() + " columns");
 			}
 		}
 	}
-
-	private ColumnAlternative cloneColumn(ColumnAlternative column)
-	{
-		ColumnAlternative newColumn = new ColumnAlternative();
-		for(RowAlternative row : column.getRowAlternatives()) {
-			newColumn.addRowAlternative(row, column.getRowAlternatives().indexOf(row));
-		}
-		return newColumn;
-	}
-
-	public List<ColumnAlternative> getColumnAlternatives()
-	{
-		return _columnAlternatives;
-	}
-
 }
