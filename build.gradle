@@ -1,0 +1,25 @@
+apply plugin: 'idea'
+apply plugin: 'java'
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['main/java']
+        }
+        resources {
+            srcDirs = ['main/resources']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'com.google.code.gson', name: 'gson', version: '1.7.2'
+    compile group: 'commons-io', name: 'commons-io', version: '2.4'
+    compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version:'1.6.1'
+}
