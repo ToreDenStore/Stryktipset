@@ -80,8 +80,6 @@ public class Main
 	private static void sumProbabilities(List<ColumnAlternative> chosenColumns)
 			throws InterruptedException
 	{
-		System.out.println("Checking covered for by 12...");
-
 		Set<ColumnAlternative> columnsCoveredFor11 = new HashSet<ColumnAlternative>();
 		Set<ColumnAlternative> columnsCoveredFor12 = new HashSet<ColumnAlternative>();
 		Set<ColumnAlternative> columnsCoveredFor13 = new HashSet<ColumnAlternative>();
@@ -100,7 +98,7 @@ public class Main
 		}
 		for(ColumnAlternative columnAlternative : columnsCoveredFor12) {
 			probability12 += columnAlternative.getProbability12();
-			System.out.println(columnAlternative.toString());
+//			System.out.println(columnAlternative.toString());
 		}
 		for(ColumnAlternative columnAlternative : columnsCoveredFor13) {
 			probability13 += columnAlternative.getProbability13();
