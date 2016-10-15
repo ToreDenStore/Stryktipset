@@ -11,7 +11,7 @@ public class RowAlternative
 		_result = result;
 	}
 
-	public float getProbability()
+	public double getProbability()
 	{
 		return _match.getProbability(_result);
 	}

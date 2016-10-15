@@ -68,7 +68,7 @@ public class Main
 	private static void assertTotalChance(List<ColumnAlternative> columnAlternatives)
 			throws Exception
 	{
-		float totalChance = 0;
+		double totalChance = 0;
 		for(ColumnAlternative columnAlternative : columnAlternatives) {
 			totalChance += columnAlternative.getProbability13();
 		}
@@ -92,9 +92,9 @@ public class Main
 			//TODO: Add 11
 		}
 
-		float probability11 = 0;
-		float probability12 = 0;
-		float probability13 = 0;
+		double probability11 = 0;
+		double probability12 = 0;
+		double probability13 = 0;
 		for(ColumnAlternative columnAlternative : columnsCoveredFor11) {
 			probability11 += columnAlternative.getProbability11();
 		}

@@ -15,9 +15,9 @@ public class ColumnAlternative
 	private Set<ColumnAlternative> _preCalculatedCoveringFor12 = new HashSet<ColumnAlternative>();
 //	private List<ColumnAlternative> _coveringFor11 = new ArrayList<ColumnAlternative>();
 
-	private float _probability13;
-	private float _probability12;
-	private float _probability11;
+	private double _probability13;
+	private double _probability12;
+	private double _probability11;
 
 	public void addRowAlternative(RowAlternative rowAlternative, int i)
 	{
@@ -39,7 +39,7 @@ public class ColumnAlternative
 		throw new NotImplementedException();
 	}
 
-	public float getProbability13()
+	public double getProbability13()
 	{
 		if(_probability13 == 0) {
 			throw new RuntimeException("p13 is 0");
@@ -47,12 +47,12 @@ public class ColumnAlternative
 		return _probability13;
 	}
 
-	public float getProbability12()
+	public double getProbability12()
 	{
 		return _probability12;
 	}
 
-	public float getProbability11()
+	public double getProbability11()
 	{
 		return _probability11;
 	}
@@ -62,7 +62,7 @@ public class ColumnAlternative
 		if(_alternatives.size() != MAXSIZE) {
 			throw new RuntimeException("Size is not 13, it is " + _alternatives.size());
 		}
-		float probability = 1;
+		double probability = 1;
 		for(RowAlternative resultAlternative : _alternatives) {
 			probability = probability * resultAlternative.getProbability();
 		}
@@ -76,7 +76,7 @@ public class ColumnAlternative
 			throw new RuntimeException("Size is not 13, it is " + _alternatives.size());
 		}
 
-		float probability = 0;
+		double probability = 0;
 		Set<ColumnAlternative> alternatives12 = getAlternatives12(alreadyTakenAlternatives);
 		for(ColumnAlternative columnAlternative : alternatives12) {
 			probability += columnAlternative.getProbability13();
@@ -183,8 +183,8 @@ public class ColumnAlternative
 		@Override
 		public int compare(ColumnAlternative o1, ColumnAlternative o2)
 		{
-			float probability1 = o1._probability12;
-			float probability2 = o2._probability12;
+			double probability1 = o1._probability12;
+			double probability2 = o2._probability12;
 			if(probability1 > probability2) {
 				return 1;
 			} else if(probability1 < probability2) {
@@ -200,8 +200,8 @@ public class ColumnAlternative
 		@Override
 		public int compare(ColumnAlternative o1, ColumnAlternative o2)
 		{
-			float probability1 = o1._probability11;
-			float probability2 = o2._probability11;
+			double probability1 = o1._probability11;
+			double probability2 = o2._probability11;
 			if(probability1 > probability2) {
 				return 1;
 			} else if(probability1 < probability2) {
