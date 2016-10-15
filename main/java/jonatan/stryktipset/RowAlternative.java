@@ -27,6 +27,11 @@ public class RowAlternative
 	}
 
 	@Override
+	public int hashCode() {
+		return _match.hashCode()^_result.hashCode();
+	}
+
+	@Override
 	public boolean equals(Object other)
 	{
 		if(other == null)

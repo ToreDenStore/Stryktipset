@@ -8,7 +8,7 @@ import java.util.Set;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class ColumnAlternative
+public class ColumnAlternative implements Cloneable
 {
 	private static final int MAXSIZE = 13;
 	private List<RowAlternative> _alternatives = new ArrayList<RowAlternative>();
@@ -132,17 +132,17 @@ public class ColumnAlternative
 			RowAlternative rowAlternative = _alternatives.get(i);
 			Result result = rowAlternative.getResult();
 			if(result != Result._1) {
-				ColumnAlternative copy = cloneColumn();
+				ColumnAlternative copy = clone();
 				copy.addRowAlternative(new RowAlternative(rowAlternative.getMatch(), Result._1), i);
 				coveringFor12.add(copy);
 			}
 			if(result != Result._X) {
-				ColumnAlternative copy = cloneColumn();
+				ColumnAlternative copy = clone();
 				copy.addRowAlternative(new RowAlternative(rowAlternative.getMatch(), Result._X), i);
 				coveringFor12.add(copy);
 			}
 			if(result != Result._2) {
-				ColumnAlternative copy = cloneColumn();
+				ColumnAlternative copy = clone();
 				copy.addRowAlternative(new RowAlternative(rowAlternative.getMatch(), Result._2), i);
 				coveringFor12.add(copy);
 			}
@@ -212,7 +212,8 @@ public class ColumnAlternative
 		}
 	}
 
-	public ColumnAlternative cloneColumn()
+	@Override
+	public ColumnAlternative clone()
 	{
 		ColumnAlternative newColumn = new ColumnAlternative();
 		for(RowAlternative row : _alternatives) {
@@ -234,6 +235,14 @@ public class ColumnAlternative
 		return counter;
 	}
 
+//    @Override
+//    public boolean equals(Object o) {
+//        if (!(o instanceof ColumnAlternative))
+//            return false;
+//
+//        return compareTo((ColumnAlternative)o,1) == 0;
+//    }
+    
 	@Override
 	public boolean equals(Object other)
 	{
@@ -283,17 +292,9 @@ public class ColumnAlternative
 	@Override
 	public int hashCode()
 	{
-//		return this.getRowAlternatives().hashCode();
+//		return Arrays.hashCode(this._alternatives);
 		return this.toString().hashCode();
 	}
 
 	//TODO: Write unit tests for hashcode and equals
-
-//	@Override
-//	public boolean equals(Object other)
-//	{
-//		ColumnAlternative otherColumnAlternative = (ColumnAlternative) other;
-////		return this.getRowAlternatives().equals(otherColumnAlternative.getRowAlternatives());
-//		return this.toString().equals(otherColumnAlternative.toString());
-//	}
 }
