@@ -51,7 +51,6 @@ public class Main
 		WeeklyBet weeklyBet = new WeeklyBet(columnAlternatives, 12, 12, 12);
 		List<ColumnAlternative> chosenColumns = weeklyBet.getChosenColumns();
 		for(ColumnAlternative columnAlternative : chosenColumns) {
-			columnAlternative.calculateProbability12(chosenColumns);
 			System.out.println(columnAlternative.toString() + " p13: " + columnAlternative.getProbability13() + " p12: "
 					+ columnAlternative.getProbability12());
 		}
