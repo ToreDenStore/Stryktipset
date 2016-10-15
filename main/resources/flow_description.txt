@@ -13,4 +13,11 @@ FOR 12 CORRECT (p12 = probability for 12 correct)
 	3.4 - Using the list from 3.3, calculate p12 by summing p13 for all the rows in the list.
 4 - Sort the list of possible outcomes based on their p12.
 5 - Pick the first entry in the list (with highest p12)
-6 - Since an entry has been added to the list of chosen outcomes (in 5), the calculations for p12 needs to be done again.
+6 - Since an entry has been added to the list of chosen outcomes (in 5), the calculations for p12 needs to be done again*.
+
+
+
+
+
+
+* Which means all steps 3-5 except currently 3.2. 3.1 could theoretically be calculated only once per possible outcomes, but this turned out to be a memory issue (I think).
