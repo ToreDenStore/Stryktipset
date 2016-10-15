@@ -1,0 +1,16 @@
+1 - Produce list of 3^13=1'594'323 different possible outcomes (win, loss or even for 13 matches)
+	- For each of these possible outcomes, calculate the probability of it using betting odds.
+
+FOR 13 CORRECT (p13 = probability for 13 correct)
+2 - Sort the list of possible outcomes based on their p13
+	2.1 - Pick the X first in the list for highest chance of getting 13 correct.
+	
+FOR 12 CORRECT (p12 = probability for 12 correct)
+3 - For each of the possible outcomes:
+	3.1 - Calculate the 27 (26 + itself) possible outcomes that are covered by the correct outcome.
+	3.2 - Calculate the outcomes that are already covered for by the outcomes already chosen in above step (2.1 in "FOR 13 CORRECT")
+	3.3 - Remove all of the outcomes from 3.1 that are also existing in 3.2 (=already covered for).
+	3.4 - Using the list from 3.3, calculate p12 by summing p13 for all the rows in the list.
+4 - Sort the list of possible outcomes based on their p12.
+5 - Pick the first entry in the list (with highest p12)
+6 - Since an entry has been added to the list of chosen outcomes (in 5), the calculations for p12 needs to be done again.
