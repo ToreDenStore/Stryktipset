@@ -235,6 +235,14 @@ public class ColumnAlternative implements Cloneable
 		return counter;
 	}
 
+//    @Override
+//    public boolean equals(Object o) {
+//        if (!(o instanceof ColumnAlternative))
+//            return false;
+//
+//        return compareTo((ColumnAlternative)o,1) == 0;
+//    }
+    
 	@Override
 	public boolean equals(Object other)
 	{
@@ -284,17 +292,9 @@ public class ColumnAlternative implements Cloneable
 	@Override
 	public int hashCode()
 	{
-//		return this.getRowAlternatives().hashCode();
+//		return Arrays.hashCode(this._alternatives);
 		return this.toString().hashCode();
 	}
 
 	//TODO: Write unit tests for hashcode and equals
-
-//	@Override
-//	public boolean equals(Object other)
-//	{
-//		ColumnAlternative otherColumnAlternative = (ColumnAlternative) other;
-////		return this.getRowAlternatives().equals(otherColumnAlternative.getRowAlternatives());
-//		return this.toString().equals(otherColumnAlternative.toString());
-//	}
 }
