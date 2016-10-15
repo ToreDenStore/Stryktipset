@@ -47,7 +47,7 @@ public class ColumnsCreator
 			createRow(columnAlternative, i, 1);
 			createRow(columnAlternative, i, 2);
 		} else {
-			ColumnAlternative column = columnAlternative.cloneColumn();
+			ColumnAlternative column = columnAlternative.clone();
 			_columnAlternatives.add(column);
 			if(_columnAlternatives.size() % 100000 == 0) {
 				System.out.println("Created " + _columnAlternatives.size() + " columns");

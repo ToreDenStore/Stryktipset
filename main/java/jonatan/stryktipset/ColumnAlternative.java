@@ -242,7 +242,7 @@ public class ColumnAlternative implements Cloneable
 //
 //        return compareTo((ColumnAlternative)o,1) == 0;
 //    }
-    
+
 	@Override
 	public boolean equals(Object other)
 	{
